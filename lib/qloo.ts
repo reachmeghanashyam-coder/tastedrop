@@ -129,7 +129,7 @@ export async function getQlooInsights(entityId: string, entityName: string, apiK
     }
   }
 
-  const simulatedLatency = 140 + Math.floor(Math.random() * 45);
+  const actualLatency = Date.now() - startTime;
   return {
     entity_id: entityId,
     entity_name: entityName,
@@ -153,8 +153,8 @@ export async function getQlooInsights(entityId: string, entityName: string, apiK
         recommended_tags: ["japanese_incense", "hinoki_wood", "smoke_cedar"]
       }
     ],
-    status: token ? "200 OK (Live Stream)" : "200 OK (Deterministic Grounded Schema)",
-    latency_ms: simulatedLatency,
-    source: "https://hackathon.api.qloo.com/v2/insights"
+    status: token ? "200 OK (Live Stream)" : "200 OK (Offline Sandbox Cache)",
+    latency_ms: actualLatency,
+    source: token ? "https://hackathon.api.qloo.com/v2/insights" : "Local Sandbox Cache (Schema Verified)"
   };
 }

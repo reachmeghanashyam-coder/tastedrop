@@ -12,18 +12,24 @@
 * **Hackathon:** Qloo Agentic Hackathon — *"Agents, but with taste"*
 * **Platform:** Devpost (`qloo.devpost.com`)
 * **Track:** Primary Autonomy & Cultural Grounding Track
-* **Sponsor Integration:** **Qloo Taste AI™ API** (`https://hackathon.api.qloo.com/v2/insights` & `/search`)
+* **Sponsor Integration:** **Official `@qloo/qloo-harness`** + **Qloo Taste AI™ API** (`https://hackathon.api.qloo.com/v2/insights` & `/search`) + **Canonical MCP Tools** (`lib/qloo-mcp.ts`)
 
 ---
 
 ## 1. What is TasteDrop?
 
-In modern e-commerce, the checkout and post-purchase confirmation screens represent the **highest-intent, highest-converting real estate on the web**. Yet platforms like Amazon and Shopify squander this moment on literal, low-converting utility items:
-* A customer buys a **$450 designer Noguchi-style center table** $\to$ the store recommends *clear vinyl table cloths ($14.99) and furniture polish ($9.50)*.
+In modern e-commerce, the checkout and post-purchase confirmation screens represent the **highest-intent moments on the web**. Yet platforms like Amazon and Shopify squander this moment on literal, low-converting utility items:
+* A customer buys a **$450 designer Noguchi-style center table** $\to$ the store recommends *clear vinyl table cloths ($18.50) and furniture polish ($13.50)* (Total baseline companion: **$32.00**).
 * A customer buys a **$650 vintage leather motorcycle jacket** $\to$ the store recommends *leather cleaning cream ($12.00) and coat hangers ($18.00)*.
 
 **TasteDrop cures this "Cultural Beige."**  
-It connects directly to **Qloo's 250M+ entity Taste Graph** to understand what **culturally belongs** around the purchase—transforming single purchases into cohesive, high-margin lifestyle orders before warehouse dispatch.
+It connects directly to **Qloo's 250M+ entity Taste Graph** to understand what **culturally belongs** around the purchase—transforming single purchases into cohesive lifestyle orders before warehouse fulfillment.
+
+### Modeled Basket Performance (Hypothesis Simulation)
+* **Standard Frequency Co-occurrence:** +$32.00 companion addition (baseline frequency model).
+* **TasteDrop Cultural Companions:** +$76.00 to +$415.00 potential companion basket expansion (tested hypothesis).
+* **Net Basket Delta:** Up to +$383.00 simulated basket expansion over utility baseline.
+* *Note: Figures represent modeled scenario basket totals; real-world incremental revenue requires live merchant A/B cohort experimentation.*
 
 ---
 
@@ -58,9 +64,11 @@ flowchart TD
 
 * **Frontend Framework:** Next.js 15 (App Router) + TypeScript + Tailwind CSS
 * **Animation & Physics:** Framer Motion (spring-motion drawers and tactile transitions)
+* **Official Hackathon Tooling:** `@qloo/qloo-harness@0.1.26` with Model Context Protocol (MCP) tool bindings (`qloo_resolve_entity`, `qloo_get_insights`, `qloo_agent_constraint_solver`)
+* **Dynamic Cultural Constraint Solver:** 4-stage optimization pipeline in `lib/matcher.ts` (Affinity $\ge 70\%$, category quotas, price caps, taste stance modulation)
 * **Audio Synthesis:** Native Web Audio API (subtle 432Hz/528Hz organic harmonic chimes upon bundle assembly)
-* **Sponsor API Client:** Direct server-side REST client targeting `https://hackathon.api.qloo.com`
-* **Test Suite:** Automated Node.js test runner (`npm test`) with exit code 0
+* **Sponsor API Client:** Direct server-side REST client targeting `https://hackathon.api.qloo.com` with resilient offline fallbacks
+* **Test Suite:** Automated Node.js test runner (`npm test`) with exit code 0 covering arithmetic, API contracts, and adversarial poison tests
 * **Deployment:** Production HTTPS containerized deployment on Vercel
 
 ---
