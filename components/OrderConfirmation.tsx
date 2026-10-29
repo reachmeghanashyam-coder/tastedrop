@@ -118,13 +118,13 @@ export function OrderConfirmation({
       </div>
 
       {/* THE POST-PURCHASE INTERCEPT: 1-Click Supplemental Addition */}
-      {mode === "tastedrop" && !postAdded && (
+      {!postAdded && (
         <div className="p-6 rounded-3xl bg-neutral-50 border border-neutral-200 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emeraldVibe" />
               <span className="text-xs font-semibold text-neutral-900 tracking-tight">
-                One Final Sensory Touch for Your Space
+                One Final Cultural Touch for Your Order
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-500">

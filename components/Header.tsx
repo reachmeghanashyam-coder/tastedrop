@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Sparkles, ShoppingBag, ShieldCheck } from "lucide-react";
 import { TasteDropLogo } from "./TasteDropLogo";
 
 interface HeaderProps {
@@ -11,54 +10,52 @@ interface HeaderProps {
   isSimulating: boolean;
 }
 
-export function Header({ mode, onToggleMode, onOpenTelemetry, isSimulating }: HeaderProps) {
+export function Header({ mode, onToggleMode, onOpenTelemetry }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-neutral-200/80 transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-200/80 transition-all">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
-        {/* Brand Logo */}
-        <div className="flex items-center gap-6">
+        {/* Standalone Pure Brand Lockup */}
+        <div className="flex items-center shrink-0">
           <TasteDropLogo />
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs text-neutral-600">
-            <span className="w-1.5 h-1.5 rounded-full bg-emeraldVibe animate-pulse" />
-            <span>Store: <strong className="text-neutral-900 font-medium">Apex Modern</strong></span>
-          </div>
         </div>
 
-        {/* Center / Action Controls: The Comparative Split-Toggle */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center p-1 rounded-full bg-neutral-100 border border-neutral-200/80 shadow-inner">
+        {/* Precision Segmented Controls */}
+        <div className="flex items-center gap-2.5">
+          {/* Segmented Dual Switch */}
+          <div className="inline-flex items-center p-0.5 rounded-full bg-neutral-100 border border-neutral-200 shadow-inner">
             <button
               onClick={() => onToggleMode("baseline")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
                 mode === "baseline"
-                  ? "bg-white text-neutral-900 shadow-sm border border-neutral-200/60"
-                  : "text-neutral-500 hover:text-neutral-800"
+                  ? "bg-white text-neutral-900 shadow-sm border border-neutral-200/70"
+                  : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${mode === "baseline" ? "bg-rose-500" : "bg-neutral-300"}`} />
-              Standard Recommender
+              <span className={`w-1.5 h-1.5 rounded-full ${mode === "baseline" ? "bg-rose-500" : "bg-neutral-300"}`} />
+              <span>Standard Baseline</span>
             </button>
             <button
               onClick={() => onToggleMode("tastedrop")}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
                 mode === "tastedrop"
-                  ? "bg-neutral-900 text-white shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-800"
+                  ? "bg-neutral-900 text-white shadow-sm font-semibold"
+                  : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${mode === "tastedrop" ? "bg-emeraldVibe animate-pulse" : "bg-neutral-300"}`} />
-              <Sparkles className="w-3.5 h-3.5 text-emeraldVibe" />
-              TasteDrop Activated
+              <span className={`w-1.5 h-1.5 rounded-full ${mode === "tastedrop" ? "bg-emerald-400 animate-pulse" : "bg-neutral-300"}`} />
+              <span>TasteDrop Active</span>
             </button>
           </div>
 
-          {/* The Back Door Button */}
+          {/* Reveal The Magic / Inspect Graph HUD Button (Secondary Ghost Pill) */}
           <button
             onClick={onOpenTelemetry}
-            className="px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+            className="px-3 py-1 rounded-full bg-white hover:bg-neutral-100 border border-neutral-200 text-neutral-700 hover:text-neutral-950 text-xs font-medium flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 shrink-0"
+            title="Open real-time Qloo cultural taste graph HUD"
           >
-            <span>⚡ REVEAL THE MAGIC</span>
+            <span className="text-amber-500 font-bold text-xs">⚡</span>
+            <span className="font-mono text-[11px] uppercase tracking-wider">Reveal The Magic</span>
           </button>
         </div>
       </div>
