@@ -143,6 +143,28 @@ export function TelemetryDrawer({
                   </div>
                 </div>
 
+                {/* Cross-Domain Traversal Visual Proof */}
+                <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-2">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold flex items-center justify-between">
+                    <span>Qloo Cross-Domain Leap (Zero Co-Occurrence)</span>
+                    <span className="text-emerald-700 font-semibold text-[10px]">Fashion → Music & Scent</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono">
+                    <div className="p-1.5 rounded-lg bg-white border border-neutral-200">
+                      <div className="text-neutral-400">Anchor Cart</div>
+                      <div className="font-semibold text-neutral-900 pt-0.5">Fashion / Jacket</div>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-emerald-800">
+                      <div className="text-emerald-600">Cross Domain A</div>
+                      <div className="font-semibold pt-0.5">Music Vinyl 🎵</div>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-purple-50/70 border border-purple-200 text-purple-800">
+                      <div className="text-purple-600">Cross Domain B</div>
+                      <div className="font-semibold pt-0.5">Fragrance EDT 🧪</div>
+                    </div>
+                  </div>
+                </div>
+
                 {topCorrelations.length > 0 && (
                   <div className="pt-1">
                     <div className="text-[10px] font-mono text-neutral-400 pb-1.5">Top Traversed Correlations from Qloo:</div>
