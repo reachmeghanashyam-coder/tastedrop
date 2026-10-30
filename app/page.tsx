@@ -233,40 +233,7 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* Judge Challenge Test Pill (Interactive Anchor Switcher) */}
-                  {activeScenarioId === "fashion_heritage" && (
-                    <div className="inline-flex items-center p-0.5 rounded-lg bg-black/80 backdrop-blur-md border border-amber-500/40 shadow-md text-[10px] font-mono">
-                      <span className="text-amber-400 font-bold px-2">Anchor:</span>
-                      <button
-                        onClick={() => {
-                          playHapticClick();
-                          setActiveAnchorQuery("The Stooges");
-                        }}
-                        className={`px-2 py-0.5 rounded transition-all ${
-                          activeAnchorQuery === "The Stooges"
-                            ? "bg-emerald-600 text-white font-bold"
-                            : "text-neutral-300 hover:text-white"
-                        }`}
-                        title="Subculture Anchor (Proto-Punk -> MC5)"
-                      >
-                        The Stooges
-                      </button>
-                      <button
-                        onClick={() => {
-                          playHapticClick();
-                          setActiveAnchorQuery("Taylor Swift");
-                        }}
-                        className={`px-2 py-0.5 rounded transition-all ${
-                          activeAnchorQuery === "Taylor Swift"
-                            ? "bg-amber-500 text-black font-bold"
-                            : "text-neutral-300 hover:text-white"
-                        }`}
-                        title="Mismatch Challenge: Pop anchor triggers autonomous abstention"
-                      >
-                        Taylor Swift (Challenge)
-                      </button>
-                    </div>
-                  )}
+
                 </div>
               </div>
 
