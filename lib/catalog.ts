@@ -161,7 +161,7 @@ export const SCENARIOS: Record<string, ScenarioData> = {
     categoryName: "Apparel & Lifestyle",
     anchorProduct: {
       id: "prod_schott_jacket",
-      title: "Schott NYC 618 Heavyweight Naked Cowhide Leather Motorcycle Jacket",
+      title: "Schott NYC 618 Motorcycle Jacket",
       subtitle: "Full-Grain Steerhide · Asymmetrical Zipper · Quilted Satin Lining",
       price: 650.00,
       rating: 4.9,
@@ -215,7 +215,7 @@ export const SCENARIOS: Record<string, ScenarioData> = {
           reviewsCount: 1650,
           isPrime: true,
           image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80",
-          editorialNote: "Smoky rum and tobacco leaf accords that pair with vintage naked cowhide.",
+          editorialNote: "Smoky rum and tobacco leaf accords that pair with vintage leather.",
           qlooTag: "niche_fragrance_subculture",
           qlooAffinity: 91
         },
@@ -237,8 +237,8 @@ export const SCENARIOS: Record<string, ScenarioData> = {
       ],
       postPurchase: {
         id: "td_chup_socks",
-        title: "Chup by Glen Clyde: Handcrafted Japanese Wool Jacquard Ribbed Beanie",
-        category: "Japanese Craft Apparel",
+        title: "Chup: Handcrafted Japanese Wool Beanie",
+        category: "Japanese Craft",
         price: 32.00,
         originalPrice: 42.00,
         discountBadge: "Save 24%",
@@ -246,7 +246,7 @@ export const SCENARIOS: Record<string, ScenarioData> = {
         reviewsCount: 410,
         isPrime: true,
         image: "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?auto=format&fit=crop&w=600&q=80",
-        editorialNote: "Slow-knit wool crafted on vintage looms in Tokyo.",
+        editorialNote: "Tokyo loom-knit wool.",
         qlooTag: "tokyo_craft_heritage",
         qlooAffinity: 85
       }

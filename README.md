@@ -1,9 +1,8 @@
 # TasteDrop // The Cultural Cart Agent
 
-> **"Your shopping cart knows what you bought. We find what actually belongs with it."**
+> **"Checkout is the best moment to upsell. Most stores waste it on generic add-ons."**
 > 
-> *"Frequently Bought Together" algorithms are trapped in predictable accessory loops.*  
-> *TasteDrop uses cultural intelligence to unlock high-margin, cross-category lifestyle bundles.*
+> *TasteDrop uses Qloo's cultural taste graph to suggest what the buyer would actually love.*
 
 ---
 
@@ -12,93 +11,85 @@
 * **Hackathon:** Qloo Agentic Hackathon — *"Agents, but with taste"*
 * **Platform:** Devpost (`qloo.devpost.com`)
 * **Track:** Primary Autonomy & Cultural Grounding Track
-* **Sponsor Integration:** **Official `@qloo/qloo-harness`** + **Qloo Taste AI™ API** (`https://hackathon.api.qloo.com/v2/insights` & `/search`) + **Canonical MCP Tools** (`lib/qloo-mcp.ts`)
+* **Sponsor Tooling:** `@qloo/qloo-harness` SDK + Qloo Taste AI™ API connectors + Model Context Protocol (MCP) tool bindings (`lib/qloo-mcp.ts`)
+* **Verification:** Zero-dependency automated test runner (`npm test` passes 5/5) covering deterministic schemas, adversarial constraints, and API contracts.
 
 ---
 
 ## 1. What is TasteDrop?
 
-In modern e-commerce, the checkout and post-purchase confirmation screens represent the **highest-intent moments on the web**. Yet platforms like Amazon and Shopify squander this moment on literal, low-converting utility items:
-* A customer buys a **$450 designer Noguchi-style center table** $\to$ the store recommends *clear vinyl table cloths ($18.50) and furniture polish ($13.50)* (Total baseline companion: **$32.00**).
-* A customer buys a **$650 vintage leather motorcycle jacket** $\to$ the store recommends *leather cleaning cream ($12.00) and coat hangers ($18.00)*.
+The moment a shopper clicks "Add to Bag", they have made an active emotional commitment. It is the single highest-intent moment in e-commerce.
 
-**TasteDrop cures this "Cultural Beige."**  
-It connects directly to **Qloo's 250M+ entity Taste Graph** to understand what **culturally belongs** around the purchase—transforming single purchases into cohesive lifestyle orders before warehouse fulfillment.
+Yet today, e-commerce recommendation algorithms waste this moment on literal, low-margin maintenance commodities:
+* A customer buying a **$650 Schott NYC leather jacket** is shown *leather cream ($12) and coat hangers ($18)*.
+* A customer buying a **$450 Noguchi sculptural table** is shown *clear vinyl tablecloths ($15) and furniture polish ($10)*.
 
-### Modeled Basket Performance (Hypothesis Simulation)
-* **Standard Frequency Co-occurrence:** +$32.00 companion addition (baseline frequency model).
-* **TasteDrop Cultural Companions:** +$76.00 to +$415.00 potential companion basket expansion (tested hypothesis).
-* **Net Basket Delta:** Up to +$383.00 simulated basket expansion over utility baseline.
-* *Note: Figures represent modeled scenario basket totals; real-world incremental revenue requires live merchant A/B cohort experimentation.*
+Traditional algorithms rely purely on co-occurrence frequency—they recommend what people buy to *maintain* the item, not what matches the *identity* of the person buying it. Pitching a cheap bottle of shoe grease to someone purchasing an iconic $650 heritage piece breaks the luxury customer experience.
+
+### How TasteDrop Explores Cultural Merchandising
+TasteDrop models how an autonomous merchandising agent can leverage cross-domain cultural affinity:
+1. **Identifies the Subculture Anchor:** Maps the primary cart item (e.g., *Schott 618 Jacket* $\to$ *1970s CBGB Proto-Punk* subculture vector).
+2. **Cross-Domain Traversal:** Traverses across unrelated domains—fragrance (`urn:entity:perfume`), rare vinyl records (`urn:entity:music`), and literature.
+3. **Curates Cohesive Companions:** Replaces utility commodities with high-affinity lifestyle companions (e.g., *Maison Margiela REPLICA 'Jazz Club' EDT* + *The Stooges 'Raw Power' Vinyl*).
 
 ---
 
-## 2. Core Architectural Pillars
+## 2. Architecture & Pipeline
 
 ```mermaid
 flowchart TD
-    A["Customer adds Primary Item (e.g. Noguchi Center Table - $450)"] --> B["Dual-Query Simulation Engine (/api/simulate)"]
+    A["Customer Clicks 'Add to Bag' (e.g. Schott NYC 618 Leather Jacket - $650)"] --> B["Simulation Engine (/api/simulate)"]
     
-    subgraph ComparativeEngine [Comparative Engine]
-        B -->|"Mode: Standard"| C["Baseline Co-occurrence Engine<br>Recommends: Plastic Tablecloth & Polish<br>(Utility Slop - 0% Cultural Vibe)"]
-        B -->|"Mode: TasteDrop"| D["Qloo Taste Graph Traversal<br>1. /search -> Resolves Entity ID<br>2. /v2/insights -> Pulls Cross-Domain Affinities"]
+    subgraph Traditional [Traditional Frequency Engine]
+        B -->|"Baseline Mode"| C["Co-occurrence Frequency Matrix<br>Bick 4 Leather Cream ($12) + Coat Hangers ($18)<br>(Generic Commodity Add-ons)"]
     end
 
-    D --> E["Store Catalog Semantic Matcher<br>Filters in-stock Prime inventory & active discounts"]
-    E --> F["Pre-Purchase Basket Drawer<br>Cast-Iron Skeleton Valet ($34, -29%)<br>Taschen Brutalism Monograph ($42)"]
-    F --> G["1-Click Order Confirmation<br>'✓ Order Placed #APX-88219'"]
-    G --> H["Post-Purchase 1-Click Intercept<br>Hinoki Japanese Incense ($22)<br>Final Combined Order: $450 -> $548 (+$98.00 Lift)"]
-```
+    subgraph QlooIntelligence [TasteDrop + Qloo Cultural Graph]
+        B -->|"Run Qloo Taste Scan"| D["Entity Resolution & Traversal<br>1. Primary Item: Schott NYC 618 (Fashion)<br>2. Subculture Vector: CBGB Proto-Punk<br>3. Cross-Domain Affinities: Perfume & Vinyl"]
+        D --> E["Taste Filter & Constraint Solver<br>Filters out low-affinity utility items<br>Ranks high-resonance lifestyle pieces (>85% Match)"]
+    end
 
-### The Dual-Door Design:
-1. **The Front Door (`Apex Modern`):** A photorealistic, clean luxury design storefront with an interactive comparative toggle (`[ 🔴 Standard Mode  |  🟢 TasteDrop Activated ]`), spring-physics basket drawer, and post-purchase confirmation.
-2. **The Back Door (`[ ⚡ REVEAL THE MAGIC ]`):** A sleek, frosted-glass telemetry drawer displaying:
-   - Live execution latency (e.g. `184ms`)
-   - Qloo Entity Resolution (`ent_noguchi_design_881`)
-   - Cross-domain affinity metrics (Brutalist Decor: 93%, Architecture Literature: 89%)
-   - Raw live JSON payload with 1-click curl replication.
+    E --> F["Co-Curated Pre-Purchase Bundle<br>Maison Margiela Jazz Club EDT ($38)<br>The Stooges: 'Raw Power' Vinyl ($28)"]
+    F --> G["1-Click Bundle Checkout ($716.00)"]
+```
 
 ---
 
-## 3. Technology Stack
+## 3. Technology Stack & Verification
 
-* **Frontend Framework:** Next.js 15 (App Router) + TypeScript + Tailwind CSS
-* **Animation & Physics:** Framer Motion (spring-motion drawers and tactile transitions)
-* **Official Hackathon Tooling:** `@qloo/qloo-harness@0.1.26` with Model Context Protocol (MCP) tool bindings (`qloo_resolve_entity`, `qloo_get_insights`, `qloo_agent_constraint_solver`)
-* **Dynamic Cultural Constraint Solver:** 4-stage optimization pipeline in `lib/matcher.ts` (Affinity $\ge 70\%$, category quotas, price caps, taste stance modulation)
-* **Audio Synthesis:** Native Web Audio API (subtle 432Hz/528Hz organic harmonic chimes upon bundle assembly)
-* **Sponsor API Client:** Direct server-side REST client targeting `https://hackathon.api.qloo.com` with resilient offline fallbacks
-* **Test Suite:** Automated Node.js test runner (`npm test`) with exit code 0 covering arithmetic, API contracts, and adversarial poison tests
-* **Deployment:** Production HTTPS containerized deployment on Vercel
+* **Frontend & Architecture:** Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS
+* **Qloo Integration Layer:**
+  * Official `@qloo/qloo-harness` SDK bindings & direct server-side REST connectors targeting `https://hackathon.api.qloo.com/v2/insights` and `/search`
+  * **Dual-Engine Fault Tolerance:** Full live network execution via `process.env.QLOO_API_KEY` paired with a zero-downtime offline fallback adhering strictly to Qloo v2 response schemas (ensuring zero blank screens while hackathon key provisioning is queued)
+  * Canonical Model Context Protocol (MCP) tools (`qloo_resolve_entity`, `qloo_get_insights`, `qloo_agent_constraint_solver`)
+* **Haptics & Audio:** Native Web Audio API organic harmonic chimes (subtle feedback upon bundle assembly and scan resolution)
+* **Testing:** 5 automated tests running via Node.js native test runner (`node --test tests/*.test.js`):
+  * Adversarial Inversion (poison inputs, null states, oversized payloads)
+  * Concurrency & Idempotency tests
+  * Catalog arithmetic verification (Scenario A & B)
+  * Health check contract verification
 
 ---
 
 ## 4. Getting Started Locally
 
 ```bash
-# 1. Clone repository
+# 1. Clone the repository
 git clone https://github.com/your-username/tastedrop.git
 cd tastedrop
 
 # 2. Install dependencies
 npm install
 
-# 3. Configure Qloo Hackathon API Key (Optional: deterministic schema active if omitted)
-# Create .env.local:
-QLOO_API_KEY=your_hackathon_api_key_here
+# 3. Optional: Set Qloo API Key in .env.local (runs with deterministic schema if omitted)
+QLOO_API_KEY=your_key_here
 
-# 4. Run automated tests (Guaranteed Exit Code 0)
+# 4. Run automated test suite (5/5 Passing Green)
 npm test
 
-# 5. Build & run production server
+# 5. Build and run production server
 npm run build
 npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the live simulation.
-
----
-
-## 5. License
-
-MIT License — free for open-source evaluation and developer extension.
+Open [http://localhost:3000](http://localhost:3000) to view the live app.

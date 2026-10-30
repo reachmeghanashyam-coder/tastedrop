@@ -1,314 +1,363 @@
+// lib/matcher.ts
 /**
  * Dynamic Cultural Constraint Solver & Agent Matcher
  * 
- * Replaces static lists with an autonomous 4-stage optimization pipeline:
- * 1. Cultural Perception: Resolves anchor entities in Qloo's knowledge graph.
- * 2. Cross-Category Candidate Pool Scan: Evaluates companion items across lighting, print, ceramics, and accessories.
- * 3. Dynamic Multi-Constraint Evaluation:
- *    - Cultural Affinity Filter (minAffinityScore: 0.0 - 1.0)
- *    - Strict Budget Cap (maxBudget USD)
- *    - Category Diversity Guard (max 1 item per category to prevent duplicate spam)
- *    - Taste Stance Modulation:
- *      * 'purist' (only items directly tied to anchor's historical era/designers)
- *      * 'balanced' (organic contemporary harmony)
- *      * 'avant-garde' (surprising high-affinity cross-domain counterpoints)
- * 4. Transparent Audit Trace: Emits mathematical proof and entity correlation for every decision.
+ * Takes live Qloo insights, maps discovered cultural vectors onto candidate merchant SKUs,
+ * evaluates constraints (budget, affinity threshold, category diversity), and produces
+ * a transparent decision record.
  */
 
 import { ProductSKU } from "./catalog";
+import { QlooInsightItem, QlooStatus } from "./qloo";
 
 export interface CandidateItem extends ProductSKU {
-  affinityScore: number;
-  candidateCategory: "lighting" | "print" | "ceramics" | "care" | "fragrance" | "footwear";
-  culturalTags: string[];
-  tasteStanceFit: Array<"purist" | "balanced" | "avant-garde">;
-  qlooEntityProof: string;
+  candidateCategory: "lighting" | "print" | "fragrance" | "vinyl" | "apparel" | "care";
+  qlooMatchKeywords: string[]; // Keywords matched against Qloo entities/genres (e.g., ["stooges", "proto-punk", "rock", "mc5", "punk"])
+  culturalContext: string;
 }
 
 export interface AgentConstraints {
-  minAffinityScore: number; // e.g. 0.70
-  maxBudget?: number; // e.g. 350
-  tasteStance: "purist" | "balanced" | "avant-garde";
-  maxItems?: number; // default 2 or 3
+  minAffinityScore: number; // 0.0 to 1.0 (Qloo cosine affinity)
+  maxBudget?: number;      // Maximum spend allowed for companion bundle
+  maxItems?: number;       // Maximum items to select (default 2)
 }
 
-export interface AgentExecutionTrace {
-  anchorId: string;
-  anchorName: string;
-  totalCandidatesEvaluated: number;
-  candidatesPassedAffinity: number;
-  candidatesPassedBudget: number;
-  candidatesSelected: number;
-  diversityCategoriesFilled: string[];
-  appliedConstraints: AgentConstraints;
-  executionTimeMs: number;
+export interface CandidateEvaluationTrace {
+  productId: string;
+  title: string;
+  price: number;
+  category: string;
+  status: "ACCEPTED" | "REJECTED";
+  qlooEvidence?: {
+    matchedEntityName?: string;
+    matchedSubtype?: string;
+    affinityScore?: number;
+    genreOverlap?: string[];
+  };
+  rejectionReason?: string;
 }
 
-export interface AgentSolverResult {
+export interface MatcherOutput {
+  status: QlooStatus;
   selectedProducts: ProductSKU[];
-  rejectedProducts: Array<{ title: string; reason: string }>;
-  trace: AgentExecutionTrace;
+  evaluationAudit: CandidateEvaluationTrace[];
+  activeConstraints: AgentConstraints;
+  runningSpend: number;
+  qlooSourceSummary: string;
 }
-
-// Master Cross-Domain Candidate Pools
-export const CANDIDATE_POOL_HOME: CandidateItem[] = [
-  {
-    id: "akari-1a",
-    title: "Akari 1A Washi Paper Light Sculpture",
-    category: "Sculptural Lighting",
-    candidateCategory: "lighting",
-    price: 220,
-    originalPrice: 260,
-    discountBadge: "Archival Release",
-    rating: 4.9,
-    reviewsCount: 382,
-    isPrime: true,
-    affinityScore: 0.96,
-    qlooAffinity: 96,
-    qlooTag: "noguchi_akari_lantern",
-    culturalTags: ["Japanese Modernism", "Washi Paper", "Isamu Noguchi 1951"],
-    tasteStanceFit: ["purist", "balanced"],
-    qlooEntityProof: "Direct entity node match: Isamu Noguchi Gifu lantern workshop (Qloo correlation 0.96)",
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Authentic washi paper light sculpture engineered by Noguchi to illuminate organic sculptural cherry wood."
-  },
-  {
-    id: "hasami-porcelain-set",
-    title: "Hasami Porcelain Matte Teapot & Cup Set",
-    category: "Artisanal Home Objects",
-    candidateCategory: "ceramics",
-    price: 110,
-    originalPrice: 135,
-    discountBadge: "Artisan Craft",
-    rating: 4.9,
-    reviewsCount: 512,
-    isPrime: true,
-    affinityScore: 0.91,
-    qlooAffinity: 91,
-    qlooTag: "hasami_stoneware",
-    culturalTags: ["Hasami Craft", "Edo-period Stoneware", "Organic Wabi-Sabi"],
-    tasteStanceFit: ["purist", "balanced", "avant-garde"],
-    qlooEntityProof: "High affinity cluster: Tokyo interior minimalism × Isamu Noguchi archive collectors (Qloo correlation 0.91)",
-    image: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Unglazed modular stoneware blending 400-year Nagasaki pottery heritage with modern architectural utility."
-  },
-  {
-    id: "monograph-noguchi",
-    title: "Isamu Noguchi: A Sculptor's World Monograph",
-    category: "Design & Art Monographs",
-    candidateCategory: "print",
-    price: 85,
-    originalPrice: 100,
-    discountBadge: "Steidl Press",
-    rating: 4.8,
-    reviewsCount: 290,
-    isPrime: true,
-    affinityScore: 0.88,
-    qlooAffinity: 88,
-    qlooTag: "noguchi_monograph",
-    culturalTags: ["Sculpture Monograph", "Steidl Hardcover", "Mid-Century Modern"],
-    tasteStanceFit: ["purist", "balanced"],
-    qlooEntityProof: "Knowledge graph overlap: Mid-century sculpture monograph publishers (Qloo correlation 0.88)",
-    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "The definitive Steidl monograph detailing Noguchi’s biomorphic design philosophy, bound in woven linen."
-  },
-  {
-    id: "avant-hinoki-incense",
-    title: "Apotheke Brass Stand & Wild Hinoki Cones",
-    category: "Olfactory Sensory",
-    candidateCategory: "fragrance",
-    price: 65,
-    originalPrice: 75,
-    discountBadge: "Tokyo Craft",
-    rating: 4.9,
-    reviewsCount: 840,
-    isPrime: true,
-    affinityScore: 0.84,
-    qlooAffinity: 84,
-    qlooTag: "hinoki_incense",
-    culturalTags: ["Sensory Olfactory", "Chiba Craft", "Japanese Cedarwood"],
-    tasteStanceFit: ["balanced", "avant-garde"],
-    qlooEntityProof: "Cross-domain affinity: Architectural living spaces × Japanese olfactory crafts (Qloo correlation 0.84)",
-    image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Hand-blended wild cypress incense paired with cast raw brass stand that ages into an organic living patina."
-  },
-  {
-    id: "flos-snoopy-lamp",
-    title: "Flos Snoopy Enamel Table Lamp",
-    category: "Sculptural Lighting",
-    candidateCategory: "lighting",
-    price: 1250, // Exceeds standard companion budget
-    originalPrice: 1350,
-    discountBadge: "Italian Icon",
-    rating: 4.9,
-    reviewsCount: 124,
-    isPrime: true,
-    affinityScore: 0.89,
-    qlooAffinity: 89,
-    qlooTag: "castiglioni_flos",
-    culturalTags: ["Italian Radical Design", "Carrara Marble", "Castiglioni 1967"],
-    tasteStanceFit: ["avant-garde"],
-    qlooEntityProof: "High mid-century Italian design graph overlap (Qloo correlation 0.89)",
-    image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Iconic Carrara marble and enameled steel light sculpture designed by the Castiglioni brothers."
-  }
-];
-
-export const CANDIDATE_POOL_FASHION: CandidateItem[] = [
-  {
-    id: "red-wing-iron-ranger",
-    title: "Iron Ranger 6\" Amber Harness Leather Boots",
-    category: "Heritage Footwear",
-    candidateCategory: "footwear",
-    price: 350,
-    originalPrice: 380,
-    discountBadge: "USA Made",
-    rating: 4.9,
-    reviewsCount: 2150,
-    isPrime: true,
-    affinityScore: 0.94,
-    qlooAffinity: 94,
-    qlooTag: "red_wing_iron_ranger",
-    culturalTags: ["Minnesota Heritage", "Goodyear Welted", "Americana Workwear"],
-    tasteStanceFit: ["purist", "balanced"],
-    qlooEntityProof: "Qloo Entity Cluster: Schott NYC × Red Wing Heritage (0.94 affinity among American heritage apparel)",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Handcrafted in Red Wing, Minnesota with oil-tanned harness leather and Vibram 430 mini-lug outsole."
-  },
-  {
-    id: "saphir-leather-balm",
-    title: "Saphir Médaille d'Or Renovateur Leather Balm",
-    category: "Archival Care",
-    candidateCategory: "care",
-    price: 32,
-    originalPrice: 38,
-    discountBadge: "Paris Est. 1925",
-    rating: 4.9,
-    reviewsCount: 3840,
-    isPrime: true,
-    affinityScore: 0.89,
-    qlooAffinity: 89,
-    qlooTag: "saphir_renovateur",
-    culturalTags: ["Mink Oil", "Beeswax", "French Heritage Restoration"],
-    tasteStanceFit: ["purist", "balanced", "avant-garde"],
-    qlooEntityProof: "Essential care pairing affinity: Full-grain steerhide restorers (Qloo correlation 0.89)",
-    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Formula containing pure beeswax and natural mink oil to preserve hand-burnished steerhide without clogging pores."
-  },
-  {
-    id: "iron-heart-flannel",
-    title: "Ultra Heavy 12oz Selvedge Tartan Flannel",
-    category: "Japanese Textiles",
-    candidateCategory: "care",
-    price: 360,
-    originalPrice: 395,
-    discountBadge: "Japanese Shuttle Loom",
-    rating: 4.9,
-    reviewsCount: 420,
-    isPrime: true,
-    affinityScore: 0.92,
-    qlooAffinity: 92,
-    qlooTag: "iron_heart_selvedge",
-    culturalTags: ["Aspero Cotton", "Motorcycle Grade", "Japanese Denim Archive"],
-    tasteStanceFit: ["purist", "balanced", "avant-garde"],
-    qlooEntityProof: "High cross-affinity: Schott Perfecto owners × Tokyo heavy motorcycle selvedge subcultures (0.92)",
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80",
-    editorialNote: "Woven in Japan on vintage shuttle looms from Peruvian Aspero cotton, unbrushed for rugged wind resistance."
-  }
-];
 
 /**
- * Solve and optimize companion bundle recommendations given dynamic constraints.
+ * Universal Merchant Catalog Candidates
+ * These are the actual store products evaluated by the solver.
  */
-export function solveCulturalBundle(
-  anchorId: string,
-  anchorName: string,
-  constraints: AgentConstraints
-): AgentSolverResult {
-  const startTime = Date.now();
-  const pool = anchorId.includes("schott") ? CANDIDATE_POOL_FASHION : CANDIDATE_POOL_HOME;
-  
-  const selected: ProductSKU[] = [];
-  const rejected: Array<{ title: string; reason: string }> = [];
-  const filledCategories = new Set<string>();
+export const STORE_CANDIDATE_POOL: Record<string, CandidateItem[]> = {
+  fashion_heritage: [
+    {
+      id: "td_stooges_vinyl",
+      title: "The Stooges: 'Raw Power' (David Bowie Mix) 180g Audiophile Vinyl",
+      category: "Rare & Heritage Vinyl",
+      candidateCategory: "vinyl",
+      price: 28.00,
+      originalPrice: 35.00,
+      discountBadge: "Cultural Anchor",
+      rating: 4.9,
+      reviewsCount: 880,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Seminal proto-punk record that soundtracked 1970s motorcycle culture.",
+      qlooTag: "garage_proto_punk",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["stooges", "proto-punk", "punk", "mc5", "rock", "new york dolls"],
+      culturalContext: "Direct cultural audio companion to 1970s CBGB motorcycle leather subculture."
+    },
+    {
+      id: "td_jazz_club",
+      title: "Maison Margiela REPLICA 'Jazz Club' Eau de Toilette (Travel Spray)",
+      category: "Artisanal Fragrance",
+      candidateCategory: "fragrance",
+      price: 38.00,
+      originalPrice: 45.00,
+      discountBadge: "Curated Companion",
+      rating: 4.8,
+      reviewsCount: 1650,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Smoky rum and tobacco leaf accords that pair with vintage leather.",
+      qlooTag: "niche_fragrance_subculture",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["margiela", "lifestyle", "parfum", "tobacco", "leather"],
+      culturalContext: "Sensory olfactory pairing designed around Brooklyn jazz club and aged leather accords."
+    },
+    {
+      id: "iron-heart-flannel",
+      title: "Iron Heart Ultra Heavy 12oz Selvedge Tartan Flannel",
+      category: "Japanese Textiles",
+      candidateCategory: "apparel",
+      price: 360.00,
+      originalPrice: 395.00,
+      discountBadge: "Vintage Shuttle Loom",
+      rating: 4.9,
+      reviewsCount: 420,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Woven in Japan on vintage shuttle looms from Peruvian Aspero cotton.",
+      qlooTag: "selvedge_textile",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["rock", "workwear", "denim", "motorcycle"],
+      culturalContext: "High-density Japanese motorcycle subculture apparel."
+    },
+    {
+      id: "base_leather_cleaner",
+      title: "Bickmore Bick 4 Premium Leather Cleaner & Conditioner (8 oz)",
+      category: "Cleaning & Maintenance",
+      candidateCategory: "care",
+      price: 12.00,
+      rating: 4.6,
+      reviewsCount: 5240,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Standard maintenance utility bottle.",
+      qlooTag: "utility_cleaner",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["cleaner", "maintenance", "conditioner"],
+      culturalContext: "Commodity maintenance supply with zero aesthetic/cultural correlation."
+    }
+  ],
+  home_decor: [
+    {
+      id: "td_cast_iron_dish",
+      title: "Cast Iron Raw Forged Organic Sculptural Dish",
+      category: "Artisanal Decor",
+      candidateCategory: "lighting",
+      price: 34.00,
+      originalPrice: 42.00,
+      discountBadge: "Hand-Forged",
+      rating: 4.9,
+      reviewsCount: 320,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Raw forged cast iron complements the dark sculptural walnut base.",
+      qlooTag: "brutalist_decor",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["sculpture", "minimalism", "design", "decor", "japan"],
+      culturalContext: "Biomorphic metalcraft complementing Noguchi's sculpted organic geometry."
+    },
+    {
+      id: "td_taschen_book",
+      title: "Taschen: Brutalism in Architecture & Modern Spatial Design",
+      category: "Design & Art Monographs",
+      candidateCategory: "print",
+      price: 42.00,
+      originalPrice: 50.00,
+      discountBadge: "Top Cultural Trend",
+      rating: 4.8,
+      reviewsCount: 914,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "The authoritative visual companion for modernist living spaces.",
+      qlooTag: "architectural_monograph",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["architecture", "monograph", "book", "modernism", "spatial"],
+      culturalContext: "Curated design theory publication exploring mid-century sculptural spaces."
+    },
+    {
+      id: "flos-snoopy-lamp",
+      title: "Flos Snoopy Enamel & Marble Table Light",
+      category: "Sculptural Lighting",
+      candidateCategory: "lighting",
+      price: 1250.00,
+      rating: 4.9,
+      reviewsCount: 95,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Carrara marble and enameled steel table light.",
+      qlooTag: "italian_lighting",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["marble", "lighting", "castiglioni"],
+      culturalContext: "Radical Italian design counterpart to mid-century furniture."
+    },
+    {
+      id: "base_table_cloth",
+      title: "Crystal Clear Heavy-Duty PVC Vinyl Tablecloth Protector",
+      category: "Cleaning & Maintenance",
+      candidateCategory: "care",
+      price: 14.99,
+      rating: 4.1,
+      reviewsCount: 3120,
+      isPrime: true,
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80",
+      editorialNote: "Transparent PVC plastic cover.",
+      qlooTag: "pvc_cover",
+      qlooAffinity: 0,
+      qlooMatchKeywords: ["pvc", "plastic", "protector"],
+      culturalContext: "Aesthetic-destroying plastic utility protector."
+    }
+  ]
+};
 
-  let passedAffinityCount = 0;
-  let passedBudgetCount = 0;
-  let runningBudgetTotal = 0;
-  const maxItems = constraints.maxItems ?? (anchorId.includes("schott") ? 2 : 3);
-  const budgetCap = constraints.maxBudget ?? (anchorId.includes("schott") ? 450 : 350);
+/**
+ * Match Qloo live insight entities against merchant candidates and solve constraints.
+ */
+export function solveDynamicBundle(
+  scenarioId: string,
+  liveEntities: QlooInsightItem[],
+  status: QlooStatus,
+  constraints: AgentConstraints,
+  offlineMessage?: string
+): MatcherOutput {
+  const pool = STORE_CANDIDATE_POOL[scenarioId] || STORE_CANDIDATE_POOL.fashion_heritage;
+  const maxItems = constraints.maxItems ?? 2;
+  const budgetCap = constraints.maxBudget ?? 150.00; // Cap to keep upsell reasonable
+  const minAffinity = constraints.minAffinityScore ?? 0.80;
 
-  // 1. Sort candidate pool by affinity score descending
-  const sortedCandidates = [...pool].sort((a, b) => b.affinityScore - a.affinityScore);
+  const selectedProducts: ProductSKU[] = [];
+  const evaluationAudit: CandidateEvaluationTrace[] = [];
+  const usedCategories = new Set<string>();
+  let currentSpend = 0;
 
-  for (const candidate of sortedCandidates) {
-    // Check 1: Cultural Affinity Gate
-    if (candidate.affinityScore < constraints.minAffinityScore) {
-      rejected.push({
+  for (const candidate of pool) {
+    // 1. Evaluate Cultural Evidence from Qloo
+    let bestMatchedEntity: QlooInsightItem | null = null;
+    let matchedKeywords: string[] = [];
+
+    if (status === "LIVE_SUCCESS" && liveEntities.length > 0) {
+      // Find highest affinity entity matching candidate's cultural keywords
+      for (const ent of liveEntities) {
+        const entNameLower = ent.name.toLowerCase();
+        const entGenres = (ent.genres || []).map(g => g.toLowerCase());
+        
+        const matches = candidate.qlooMatchKeywords.some(kw => 
+          entNameLower.includes(kw) || entGenres.some(g => g.includes(kw))
+        );
+
+        if (matches) {
+          if (!bestMatchedEntity || ent.affinity > bestMatchedEntity.affinity) {
+            bestMatchedEntity = ent;
+            matchedKeywords.push(ent.name);
+          }
+        }
+      }
+    }
+
+    // Determine derived affinity score
+    let calculatedAffinity = 0;
+    let evidenceNote = "";
+
+    if (bestMatchedEntity) {
+      calculatedAffinity = bestMatchedEntity.affinity;
+      evidenceNote = `Live Qloo correlation: Matched related entity '${bestMatchedEntity.name}' (${bestMatchedEntity.subtype}) with affinity ${(calculatedAffinity * 100).toFixed(1)}%`;
+    } else if (candidate.candidateCategory === "care") {
+      calculatedAffinity = 0.12; // Maintenance commodities have near-zero cultural affinity
+      evidenceNote = "Maintenance utility commodity: No cultural entity or subculture affinity discovered in Qloo graph";
+    } else if (status === "LIVE_SUCCESS") {
+      // In live mode: If candidate has no correlation to the live Qloo graph, it has 0.0 cultural evidence
+      calculatedAffinity = 0.0;
+      evidenceNote = `Rejected: No correlation discovered in live Qloo graph for active anchor query`;
+    } else {
+      // Explicit offline demo fallback
+      calculatedAffinity = 0.88;
+      evidenceNote = `Offline fallback mode: ${offlineMessage || "Demonstration baseline"}`;
+    }
+
+    // Constraint 1: Affinity Threshold
+    if (calculatedAffinity < minAffinity) {
+      evaluationAudit.push({
+        productId: candidate.id,
         title: candidate.title,
-        reason: `Affinity ${(candidate.affinityScore * 100).toFixed(0)}% below required threshold ${(constraints.minAffinityScore * 100).toFixed(0)}%`
+        price: candidate.price,
+        category: candidate.category,
+        status: "REJECTED",
+        rejectionReason: `Cultural affinity ${(calculatedAffinity * 100).toFixed(1)}% is below threshold ${(minAffinity * 100).toFixed(0)}% (${evidenceNote})`,
+        qlooEvidence: bestMatchedEntity ? {
+          matchedEntityName: bestMatchedEntity.name,
+          affinityScore: calculatedAffinity
+        } : undefined
       });
       continue;
     }
-    passedAffinityCount++;
 
-    // Check 2: Taste Stance Compatibility
-    if (!candidate.tasteStanceFit.includes(constraints.tasteStance)) {
-      rejected.push({
+    // Constraint 2: Budget Cap
+    if (currentSpend + candidate.price > budgetCap) {
+      evaluationAudit.push({
+        productId: candidate.id,
         title: candidate.title,
-        reason: `Item stance [${candidate.tasteStanceFit.join(", ")}] does not match active agent stance '${constraints.tasteStance}'`
+        price: candidate.price,
+        category: candidate.category,
+        status: "REJECTED",
+        rejectionReason: `Price ($${candidate.price.toFixed(2)}) exceeds remaining bundle budget ($${(budgetCap - currentSpend).toFixed(2)})`,
+        qlooEvidence: bestMatchedEntity ? {
+          matchedEntityName: bestMatchedEntity.name,
+          affinityScore: calculatedAffinity
+        } : undefined
       });
       continue;
     }
 
-    // Check 3: Category Diversity Guard (No duplicate categories)
-    if (filledCategories.has(candidate.candidateCategory)) {
-      rejected.push({
+    // Constraint 3: Category Diversity Guard
+    if (usedCategories.has(candidate.candidateCategory)) {
+      evaluationAudit.push({
+        productId: candidate.id,
         title: candidate.title,
-        reason: `Category '${candidate.candidateCategory}' already fulfilled by higher-affinity candidate`
+        price: candidate.price,
+        category: candidate.category,
+        status: "REJECTED",
+        rejectionReason: `Category '${candidate.candidateCategory}' already fulfilled by higher-ranking companion`,
+        qlooEvidence: bestMatchedEntity ? {
+          matchedEntityName: bestMatchedEntity.name,
+          affinityScore: calculatedAffinity
+        } : undefined
       });
       continue;
     }
 
-    // Check 4: Budget Cap Constraint
-    if (runningBudgetTotal + candidate.price > budgetCap) {
-      rejected.push({
-        title: candidate.title,
-        reason: `Price ($${candidate.price}) exceeds remaining budget ($${budgetCap - runningBudgetTotal})`
-      });
-      continue;
-    }
-    passedBudgetCount++;
+    // All constraints passed -> Accept Candidate
+    usedCategories.add(candidate.candidateCategory);
+    currentSpend += candidate.price;
 
-    // Satisfied all constraints: commit candidate
-    selected.push(candidate);
-    filledCategories.add(candidate.candidateCategory);
-    runningBudgetTotal += candidate.price;
+    const acceptedProduct: ProductSKU = {
+      id: candidate.id,
+      title: candidate.title,
+      category: candidate.category,
+      price: candidate.price,
+      originalPrice: candidate.originalPrice,
+      discountBadge: candidate.discountBadge,
+      rating: candidate.rating,
+      reviewsCount: candidate.reviewsCount,
+      isPrime: candidate.isPrime,
+      image: candidate.image,
+      editorialNote: candidate.editorialNote,
+      qlooTag: candidate.qlooTag,
+      qlooAffinity: Math.round(calculatedAffinity * 100),
+      isUtilitySlop: false
+    };
 
-    if (selected.length >= maxItems) {
+    selectedProducts.push(acceptedProduct);
+    evaluationAudit.push({
+      productId: candidate.id,
+      title: candidate.title,
+      price: candidate.price,
+      category: candidate.category,
+      status: "ACCEPTED",
+      qlooEvidence: {
+        matchedEntityName: bestMatchedEntity?.name || "Curated Aesthetic Vector",
+        affinityScore: calculatedAffinity,
+        genreOverlap: bestMatchedEntity?.genres
+      }
+    });
+
+    if (selectedProducts.length >= maxItems) {
       break;
     }
   }
 
-  const executionTimeMs = Date.now() - startTime;
-
   return {
-    selectedProducts: selected,
-    rejectedProducts: rejected,
-    trace: {
-      anchorId,
-      anchorName,
-      totalCandidatesEvaluated: pool.length,
-      candidatesPassedAffinity: passedAffinityCount,
-      candidatesPassedBudget: passedBudgetCount,
-      candidatesSelected: selected.length,
-      diversityCategoriesFilled: Array.from(filledCategories),
-      appliedConstraints: {
-        ...constraints,
-        maxBudget: budgetCap,
-        maxItems
-      },
-      executionTimeMs
-    }
+    status,
+    selectedProducts,
+    evaluationAudit,
+    activeConstraints: constraints,
+    runningSpend: currentSpend,
+    qlooSourceSummary: status === "LIVE_SUCCESS" 
+      ? `Live Qloo Graph (${liveEntities.length} entities traversed from hackathon.api.qloo.com)`
+      : `Fallback (${status})`
   };
 }
