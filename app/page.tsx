@@ -464,7 +464,7 @@ export default function Home() {
                       Autonomous Abstention — Zero Ungrounded Upsells
                     </div>
                     <p className="text-xs text-amber-950 max-w-lg leading-relaxed font-sans">
-                      Qloo's live cultural graph returned pop entities for <span className="font-semibold">{activeAnchorQuery}</span> (e.g. Carly Rae Jepsen), yielding <span className="font-semibold">0.0% correlation</span> with the available American heritage leather catalog.
+                      Qloo's live cultural graph returned no entities for <span className="font-semibold">{activeAnchorQuery}</span> that clear the relevance threshold against the available catalog.
                     </p>
                     <div className="text-[11px] font-mono text-amber-800 bg-amber-100/70 px-3 py-1 rounded-full border border-amber-200">
                       Solver Decision: Refused to force an irrelevant recommendation · Basket preserved at $650.00

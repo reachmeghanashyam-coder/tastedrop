@@ -254,7 +254,7 @@ export function TelemetryDrawer({
                     </div>
                     <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60">
                       <div className="text-emerald-400 text-[10px]">TasteDrop Cultural Basket</div>
-                      <div className="font-semibold text-emerald-300 pt-0.5">$678.00 - $716.00 Total</div>
+                      <div className="font-semibold text-emerald-300 pt-0.5">$678.00 Total</div>
                       <div className="text-[10px] text-emerald-200/80 pt-0.5">Jacket ($650) + Stooges Vinyl ($28)</div>
                       <div className="text-[9px] text-emerald-400 mt-1 font-semibold">High-affinity lifestyle companion</div>
                     </div>
