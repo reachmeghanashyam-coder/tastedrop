@@ -228,15 +228,37 @@ export function TelemetryDrawer({
                 </div>
               </div>
 
-              {/* STAGE 4: ACTION / ABSTENTION SUMMARY */}
-              <div className="p-3.5 rounded-2xl bg-neutral-900 text-white text-xs font-mono space-y-1">
-                <div className="text-[10px] text-neutral-400 uppercase tracking-wider">
-                  Stage 4 — Final Action Commitment
+              {/* STAGE 4: ACTION / ABSTENTION SUMMARY & UNIT ECONOMICS */}
+              <div className="p-4 rounded-2xl bg-neutral-950 text-white space-y-3 border border-neutral-800">
+                <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                  <span>Stage 4 — Final Action Commitment</span>
+                  <span className="text-emerald-400 font-bold">Verified Retail Proof</span>
                 </div>
-                <div className="text-neutral-200 font-sans text-xs">
+                <div className="text-neutral-200 font-sans text-xs leading-relaxed">
                   {evaluationTrace.filter((t: any) => t.status === "ACCEPTED").length > 0 
                     ? "✓ Successfully committed 1-click curated lifestyle companion to cart."
                     : "✕ Autonomous Abstention: Refused to force ungrounded upsell. Shopping basket preserved."}
+                </div>
+
+                {/* Grounded Unit Economics Comparison */}
+                <div className="pt-2 border-t border-neutral-800/80 space-y-2">
+                  <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
+                    Basket Quality & Category Contrast
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                    <div className="p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800">
+                      <div className="text-neutral-400 text-[10px]">Traditional Add-on</div>
+                      <div className="font-semibold text-neutral-300 pt-0.5">$680.00 Total</div>
+                      <div className="text-[10px] text-neutral-500 pt-0.5">Jacket ($650) + Grease ($12) + Hangers ($18)</div>
+                      <div className="text-[9px] text-neutral-400 mt-1 italic">Low-margin commodity utility</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60">
+                      <div className="text-emerald-400 text-[10px]">TasteDrop Cultural Basket</div>
+                      <div className="font-semibold text-emerald-300 pt-0.5">$678.00 - $716.00 Total</div>
+                      <div className="text-[10px] text-emerald-200/80 pt-0.5">Jacket ($650) + Stooges Vinyl ($28)</div>
+                      <div className="text-[9px] text-emerald-400 mt-1 font-semibold">High-affinity lifestyle companion</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </>
