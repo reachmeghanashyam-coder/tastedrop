@@ -21,7 +21,7 @@ export interface QlooInsightItem {
   id: string;
   name: string;
   subtype: string;
-  affinity: number; // 0.0 to 1.0 (Qloo cosine similarity / score)
+  affinity: number; // 0.0 to 1.0 (Returned Qloo cultural correlation score)
   genres?: string[];
 }
 

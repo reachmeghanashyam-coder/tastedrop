@@ -17,7 +17,7 @@ export interface CandidateItem extends ProductSKU {
 }
 
 export interface AgentConstraints {
-  minAffinityScore: number; // 0.0 to 1.0 (Qloo cosine affinity)
+  minAffinityScore: number; // 0.0 to 1.0 (Returned Qloo cultural correlation score threshold)
   maxBudget?: number;      // Maximum spend allowed for companion bundle
   maxItems?: number;       // Maximum items to select (default 2)
 }
@@ -226,9 +226,14 @@ export function solveDynamicBundle(
         const entNameLower = ent.name.toLowerCase();
         const entGenres = (ent.genres || []).map(g => g.toLowerCase());
         
-        const matches = candidate.qlooMatchKeywords.some(kw => 
-          entNameLower.includes(kw) || entGenres.some(g => g.includes(kw))
-        );
+        const matches = candidate.qlooMatchKeywords.some(kw => {
+          const kwLower = kw.toLowerCase().trim();
+          const boundaryCheck = (target: string) => {
+            const tokens = target.split(/[^a-z0-9]+/);
+            return tokens.includes(kwLower) || target === kwLower;
+          };
+          return boundaryCheck(entNameLower) || entGenres.some(g => boundaryCheck(g));
+        });
 
         if (matches) {
           if (!bestMatchedEntity || ent.affinity > bestMatchedEntity.affinity) {
