@@ -11,6 +11,7 @@
 * **Hackathon:** Qloo Agentic Hackathon — *"Agents, but with taste"*
 * **Platform:** Devpost (`qloo.devpost.com`)
 * **Track:** Primary Autonomy & Cultural Grounding Track
+* **Live Deployment:** **[https://tastedrop-433o.vercel.app](https://tastedrop-433o.vercel.app)**
 * **Sponsor Tooling:** Direct Qloo Taste AI™ API connectors (`/v2/insights` and `/search`) + Model Context Protocol (MCP) canonical tool bindings (`lib/qloo-mcp.ts`)
 * **Verification:** Zero-dependency automated test runner (**13/13 passing green** in <400ms) covering deterministic schemas, 3-tier cultural taxonomy matching, causality controls, and adversarial inversion.
 
