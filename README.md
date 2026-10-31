@@ -11,7 +11,8 @@
 * **Hackathon:** Qloo Agentic Hackathon — *"Agents, but with taste"*
 * **Platform:** Devpost (`qloo.devpost.com`)
 * **Track:** Primary Autonomy & Cultural Grounding Track
-* **Live Deployment:** **[https://tastedrop-433o.vercel.app](https://tastedrop-433o.vercel.app)**
+* **Live Production URL:** **[https://tastedrop-433o.vercel.app](https://tastedrop-433o.vercel.app)**
+* **Public GitHub Repo:** **[https://github.com/reachmeghanashyam-coder/tastedrop](https://github.com/reachmeghanashyam-coder/tastedrop)**
 * **Sponsor Tooling:** Direct Qloo Taste AI™ API connectors (`/v2/insights` and `/search`) + Model Context Protocol (MCP) canonical tool bindings (`lib/qloo-mcp.ts`)
 * **Verification:** Zero-dependency automated test runner (**13/13 passing green** in <400ms) covering deterministic schemas, 3-tier cultural taxonomy matching, causality controls, and adversarial inversion.
 
@@ -98,4 +99,4 @@ npm run build
 npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the live app.
+Open [https://tastedrop-433o.vercel.app](https://tastedrop-433o.vercel.app) to view the live production deployment (or run locally at `http://localhost:3000`).
