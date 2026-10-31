@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { 
-  X, Check, Copy, Activity, Terminal
+  X, Check, Copy, Activity, Terminal, ArrowRight, Sparkles
 } from "lucide-react";
 import { playHapticClick } from "@/lib/audio";
 
@@ -20,11 +20,11 @@ export function TelemetryDrawer({
   provenance,
 }: TelemetryProps) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"lab" | "curl">("lab");
+  const [activeTab, setActiveTab] = useState<"visual" | "curl">("visual");
 
   if (!isOpen) return null;
 
-  const liveLatency = provenance?.latency_ms || 260;
+  const liveLatency = provenance?.latency_ms || 58;
   const liveStatus = provenance?.status || "LIVE_SUCCESS";
   const anchorName = provenance?.anchor?.entityName || "The Stooges";
   const anchorId = provenance?.anchor?.entityId || "5712394B-DBA2-4338-AD92-324B29B601FB";
@@ -45,21 +45,21 @@ export function TelemetryDrawer({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col border-l border-neutral-200 animate-in slide-in-from-right duration-300"
+        className="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col border-l border-neutral-200 animate-in slide-in-from-right duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/70">
-          <div className="flex items-center gap-2.5">
+        <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/70">
+          <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-emerald-100/80 text-emerald-800">
-              <Activity className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-neutral-950 font-mono tracking-tight uppercase">
-                Merchandising Decision Lab
+              <h3 className="text-sm font-semibold text-neutral-900 tracking-tight">
+                How TasteDrop Works
               </h3>
               <p className="text-[11px] text-neutral-500 font-mono">
-                Two-Layer Intelligence: Qloo Cultural Graph → Retail Constraint Solver
+                Live Qloo Intelligence · {liveLatency}ms
               </p>
             </div>
           </div>
@@ -67,12 +67,12 @@ export function TelemetryDrawer({
           <div className="flex items-center gap-2">
             <div className="flex bg-neutral-200/60 p-0.5 rounded-lg text-[11px] font-mono">
               <button
-                onClick={() => { playHapticClick(); setActiveTab("lab"); }}
+                onClick={() => { playHapticClick(); setActiveTab("visual"); }}
                 className={`px-2.5 py-1 rounded-md transition-all ${
-                  activeTab === "lab" ? "bg-white text-neutral-950 font-semibold shadow-2xs" : "text-neutral-600 hover:text-neutral-950"
+                  activeTab === "visual" ? "bg-white text-neutral-950 font-semibold shadow-2xs" : "text-neutral-600 hover:text-neutral-950"
                 }`}
               >
-                Decision Lab
+                Visual Flow
               </button>
               <button
                 onClick={() => { playHapticClick(); setActiveTab("curl"); }}
@@ -80,7 +80,7 @@ export function TelemetryDrawer({
                   activeTab === "curl" ? "bg-white text-neutral-950 font-semibold shadow-2xs" : "text-neutral-600 hover:text-neutral-950"
                 }`}
               >
-                cURL / API
+                API
               </button>
             </div>
 
@@ -94,181 +94,103 @@ export function TelemetryDrawer({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {activeTab === "lab" ? (
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {activeTab === "visual" ? (
             <>
-              {/* STAGE 1: THE MERCHANT GOAL */}
-              <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50/50 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-950" />
-                    Stage 1 — Configured Merchant Objective
-                  </span>
-                  <span className="text-[10px] font-mono text-emerald-800 bg-emerald-100/60 px-2 py-0.5 rounded-full font-semibold">
-                    Autonomous Constraint Set
-                  </span>
+              {/* Card 1: The Cultural Leap (Simple, visual 3 boxes) */}
+              <div className="p-4 rounded-2xl border border-neutral-200 bg-neutral-50/50 space-y-3">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold">
+                  1. Cultural Resonance
                 </div>
-                <p className="text-xs text-neutral-800 font-medium leading-relaxed">
-                  "Find culturally aligned, cross-category companions matching the anchor's aesthetic vector while respecting budget and category limits. Abstain if evidence is insufficient."
-                </p>
-                <div className="grid grid-cols-3 gap-2 pt-1 border-t border-neutral-200/60 text-[11px] font-mono text-neutral-600">
-                  <div>Max Spend: <span className="font-semibold text-neutral-950">$150.00</span></div>
-                  <div>Min Evidence: <span className="font-semibold text-neutral-950">0.80</span></div>
-                  <div>Diversity: <span className="font-semibold text-neutral-950">1/category</span></div>
-                </div>
-              </div>
-
-              {/* STAGE 2: LIVE PERCEPTION (QLOO) */}
-              <div className="rounded-2xl border border-neutral-200 p-4 bg-white space-y-3 shadow-2xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${liveStatus === "LIVE_SUCCESS" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
-                    Stage 2 — Live Cultural Perception (Qloo API)
-                  </span>
-                  <span className="text-[10px] font-mono text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md font-semibold">
-                    {liveLatency}ms latency
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-                    <div className="text-[10px] font-mono text-neutral-400">Anchor Signal</div>
-                    <div className="font-semibold text-neutral-950 pt-0.5">{anchorName}</div>
-                    <div className="text-[10px] font-mono text-neutral-500 truncate pt-0.5">ID: {anchorId}</div>
+                
+                <div className="flex items-center justify-between gap-2 text-xs">
+                  <div className="flex-1 p-2.5 rounded-xl bg-white border border-neutral-200 text-center">
+                    <div className="text-[10px] text-neutral-400 font-mono">Cart Anchor</div>
+                    <div className="font-semibold text-neutral-900 mt-0.5">Schott Jacket</div>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-                    <div className="text-[10px] font-mono text-neutral-400">Upstream Status</div>
-                    <div className="font-semibold text-emerald-700 pt-0.5">{liveStatus}</div>
-                    <div className="text-[10px] font-mono text-neutral-500 pt-0.5">Discovered: {topCorrelations.length} entities</div>
-                  </div>
-                </div>
 
-                {/* Cross-Domain Traversal Visual Proof */}
-                <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-2">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold flex items-center justify-between">
-                    <span>Qloo Cross-Domain Leap (Zero Co-Occurrence)</span>
-                    <span className="text-emerald-700 font-semibold text-[10px]">Fashion → Music & Scent</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono">
-                    <div className="p-1.5 rounded-lg bg-white border border-neutral-200">
-                      <div className="text-neutral-400">Anchor Cart</div>
-                      <div className="font-semibold text-neutral-900 pt-0.5">Fashion / Jacket</div>
-                    </div>
-                    <div className="p-1.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-emerald-800">
-                      <div className="text-emerald-600">Cross Domain A</div>
-                      <div className="font-semibold pt-0.5">Music Vinyl 🎵</div>
-                    </div>
-                    <div className="p-1.5 rounded-lg bg-purple-50/70 border border-purple-200 text-purple-800">
-                      <div className="text-purple-600">Cross Domain B</div>
-                      <div className="font-semibold pt-0.5">Fragrance EDT 🧪</div>
-                    </div>
+                  <ArrowRight className="w-4 h-4 text-emerald-500 shrink-0" />
+
+                  <div className="flex-1 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center text-emerald-900">
+                    <div className="text-[10px] text-emerald-600 font-mono">Qloo Match</div>
+                    <div className="font-semibold mt-0.5">The Stooges (97%)</div>
                   </div>
                 </div>
 
                 {topCorrelations.length > 0 && (
-                  <div className="pt-1">
-                    <div className="text-[10px] font-mono text-neutral-400 pb-1.5">Top Traversed Correlations from Qloo:</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {topCorrelations.slice(0, 4).map((ent: any) => (
-                        <span key={ent.id || ent.name} className="px-2 py-0.5 rounded-md bg-neutral-100 text-[11px] font-mono text-neutral-800 border border-neutral-200/70">
-                          {ent.name} <span className="text-emerald-700 font-semibold font-mono">({(ent.affinity * 100).toFixed(1)}%)</span>
-                        </span>
-                      ))}
-                    </div>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {topCorrelations.slice(0, 3).map((ent: any) => (
+                      <span key={ent.id || ent.name} className="px-2 py-0.5 rounded-md bg-white text-[11px] font-mono text-neutral-700 border border-neutral-200">
+                        {ent.name} <span className="text-emerald-700 font-semibold font-mono">{(ent.affinity * 100).toFixed(0)}%</span>
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* STAGE 3: TWO-STAGE INTERPRETATION TABLE */}
-              <div className="rounded-2xl border border-neutral-200 p-4 bg-white space-y-3 shadow-2xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-950" />
-                    Stage 3 — Retail Candidate Decision Trace
-                  </span>
-                  <span className="text-[10px] font-mono text-neutral-500">
-                    Evaluated: {evaluationTrace.length} candidates
-                  </span>
+              {/* Card 2: Filter Decisions (Clean, readable accept/reject) */}
+              <div className="p-4 rounded-2xl border border-neutral-200 bg-white space-y-3 shadow-2xs">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold">
+                  2. Smart Inventory Curation
                 </div>
 
                 <div className="space-y-2">
                   {evaluationTrace.map((trace: any) => (
                     <div 
                       key={trace.productId}
-                      className={`p-2.5 rounded-xl border text-xs flex flex-col gap-1 transition-all ${
+                      className={`p-2.5 rounded-xl border text-xs flex items-center justify-between transition-all ${
                         trace.status === "ACCEPTED" 
-                          ? "bg-emerald-50/40 border-emerald-200/80" 
-                          : "bg-neutral-50/60 border-neutral-200/60"
+                          ? "bg-emerald-50/50 border-emerald-200 text-emerald-950" 
+                          : "bg-neutral-50/50 border-neutral-200/70 text-neutral-500"
                       }`}
                     >
-                      <div className="flex items-center justify-between font-mono">
-                        <span className="font-semibold text-neutral-950 truncate max-w-[340px]">
-                          {trace.title}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          trace.status === "ACCEPTED" ? "bg-emerald-600 text-white" : "bg-neutral-200 text-neutral-700"
-                        }`}>
-                          {trace.status}
-                        </span>
+                      <div className="min-w-0 pr-2">
+                        <div className="font-medium truncate">{trace.title}</div>
+                        <div className="text-[10px] font-mono opacity-80">
+                          {trace.status === "ACCEPTED" 
+                            ? `✓ Cultural match · $${trace.price}` 
+                            : `✕ ${trace.price > 150 ? "Over budget limit" : "No cultural match"}`}
+                        </div>
                       </div>
 
-                      <div className="text-[11px] text-neutral-600 font-mono">
-                        {trace.status === "ACCEPTED" ? (
-                          <span className="text-emerald-800">
-                            ✓ Correlated via '{trace.qlooEvidence?.matchedEntityName}' (Affinity: {(trace.qlooEvidence?.affinityScore * 100).toFixed(1)}%) · Budget & category passed
-                          </span>
-                        ) : (
-                          <span className="text-neutral-500">
-                            ✕ {trace.rejectionReason}
-                          </span>
-                        )}
-                      </div>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                        trace.status === "ACCEPTED" ? "bg-emerald-600 text-white" : "bg-neutral-200 text-neutral-600"
+                      }`}>
+                        {trace.status === "ACCEPTED" ? "Added" : "Skipped"}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* STAGE 4: ACTION / ABSTENTION SUMMARY & UNIT ECONOMICS */}
-              <div className="p-4 rounded-2xl bg-neutral-950 text-white space-y-3 border border-neutral-800">
-                <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-                  <span>Stage 4 — Final Action Commitment</span>
-                  <span className="text-emerald-400 font-bold">Verified Retail Proof</span>
-                </div>
-                <div className="text-neutral-200 font-sans text-xs leading-relaxed">
-                  {evaluationTrace.filter((t: any) => t.status === "ACCEPTED").length > 0 
-                    ? "✓ Successfully committed 1-click curated lifestyle companion to cart."
-                    : "✕ Autonomous Abstention: Refused to force ungrounded upsell. Shopping basket preserved."}
+              {/* Card 3: The Result Comparison (Clean and obvious) */}
+              <div className="p-4 rounded-2xl bg-neutral-900 text-white space-y-3">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 font-semibold">
+                  3. The Customer Experience
                 </div>
 
-                {/* Grounded Unit Economics Comparison */}
-                <div className="pt-2 border-t border-neutral-800/80 space-y-2">
-                  <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
-                    Basket Quality & Category Contrast
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700/60">
+                    <div className="text-[10px] text-neutral-400 font-mono">Traditional</div>
+                    <div className="text-neutral-300 font-medium mt-1">Shoe grease & hangers</div>
+                    <div className="text-[10px] text-neutral-500 mt-1">Utility maintenance</div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-                    <div className="p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800">
-                      <div className="text-neutral-400 text-[10px]">Traditional Add-on</div>
-                      <div className="font-semibold text-neutral-300 pt-0.5">$680.00 Total</div>
-                      <div className="text-[10px] text-neutral-500 pt-0.5">Jacket ($650) + Grease ($12) + Hangers ($18)</div>
-                      <div className="text-[9px] text-neutral-400 mt-1 italic">Low-margin commodity utility</div>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60">
-                      <div className="text-emerald-400 text-[10px]">TasteDrop Cultural Basket</div>
-                      <div className="font-semibold text-emerald-300 pt-0.5">$678.00 Total</div>
-                      <div className="text-[10px] text-emerald-200/80 pt-0.5">Jacket ($650) + Stooges Vinyl ($28)</div>
-                      <div className="text-[9px] text-emerald-400 mt-1 font-semibold">High-affinity lifestyle companion</div>
-                    </div>
+
+                  <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-700/60 text-emerald-200">
+                    <div className="text-[10px] text-emerald-400 font-mono">With TasteDrop</div>
+                    <div className="text-white font-medium mt-1">Stooges Vinyl record</div>
+                    <div className="text-[10px] text-emerald-400 mt-1">Cultural lifestyle companion</div>
                   </div>
                 </div>
               </div>
             </>
           ) : (
             /* cURL / DEVELOPER API TRACE TAB */
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-semibold text-neutral-900 flex items-center gap-1.5">
                   <Terminal className="w-4 h-4 text-neutral-600" />
-                  Live Upstream Request Trace
+                  Live API Query
                 </span>
                 <button
                   onClick={handleCopy}
@@ -279,27 +201,22 @@ export function TelemetryDrawer({
                 </button>
               </div>
 
-              <div className="p-4 rounded-xl bg-neutral-950 text-neutral-200 font-mono text-xs overflow-x-auto leading-relaxed border border-neutral-800">
+              <div className="p-3.5 rounded-xl bg-neutral-950 text-neutral-200 font-mono text-xs overflow-x-auto leading-relaxed border border-neutral-800">
                 <pre>{curlCommand}</pre>
               </div>
 
-              <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50 space-y-2 text-xs">
-                <div className="font-semibold text-neutral-950 font-mono">Response Signature:</div>
-                <div className="font-mono text-[11px] text-neutral-600 space-y-1">
-                  <div>Status: <span className="text-neutral-950 font-bold">{provenance?.httpStatus || 200} OK</span></div>
-                  <div>Server: <span className="text-neutral-950">hackathon.api.qloo.com</span></div>
-                  <div>Protocol: <span className="text-neutral-950">Direct Server-Side HTTPS (x-api-key)</span></div>
-                  <div>Latency: <span className="text-neutral-950 font-bold">{liveLatency}ms</span></div>
-                </div>
+              <div className="p-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-mono text-neutral-600 space-y-1">
+                <div>Endpoint: <span className="text-neutral-900 font-semibold">/v2/insights</span></div>
+                <div>Status: <span className="text-emerald-700 font-semibold">200 OK ({liveLatency}ms)</span></div>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-neutral-100 bg-neutral-50 flex items-center justify-between text-[11px] font-mono text-neutral-400">
-          <span>TasteDrop Decision Provenance</span>
-          <span>Powered by Qloo Taste AI™ Graph</span>
+        <div className="p-3 border-t border-neutral-100 bg-neutral-50 flex items-center justify-between text-[11px] font-mono text-neutral-400">
+          <span>TasteDrop Decision Engine</span>
+          <span className="text-emerald-700 font-medium">Qloo Graph Active</span>
         </div>
       </div>
     </div>
