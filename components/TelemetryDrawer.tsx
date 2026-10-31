@@ -240,13 +240,13 @@ export function TelemetryDrawer({
                   <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06]">
                     <div className="text-[10px] text-neutral-500 font-mono">Legacy Baseline</div>
                     <div className="text-neutral-300 font-medium mt-1 text-[11px]">Leather cleaner & hangers</div>
-                    <div className="text-[10px] text-neutral-500 mt-1 font-mono">$30 utility slop (2% conv)</div>
+                    <div className="text-[10px] text-neutral-500 mt-1 font-mono">$30 utility accessories</div>
                   </div>
 
                   <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30">
                     <div className="text-[10px] text-emerald-400 font-mono">TasteDrop Curation</div>
                     <div className="text-white font-medium mt-1 text-[11px]">The Stooges Vinyl</div>
-                    <div className="text-[10px] text-emerald-400 mt-1 font-mono">$678 companion bundle</div>
+                    <div className="text-[10px] text-emerald-400 mt-1 font-mono">$28 cultural companion</div>
                   </div>
                 </div>
               </div>
