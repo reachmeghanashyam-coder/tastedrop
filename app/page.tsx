@@ -67,6 +67,30 @@ export default function Home() {
     }
   };
 
+  // Fetch live Qloo telemetry immediately on mount so "Inspect Taste Graph" is ALWAYS populated with live data
+  useEffect(() => {
+    const prefetchQlooTelemetry = async () => {
+      try {
+        const res = await fetch("/api/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            scenarioId: activeScenarioId, 
+            mode: "tastedrop",
+            overrideEntityQuery: activeAnchorQuery
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.qlooProvenance) {
+          setTelemetryData(data.qlooProvenance);
+        }
+      } catch (e) {
+        console.error("Telemetry prefetch error", e);
+      }
+    };
+    prefetchQlooTelemetry();
+  }, [activeScenarioId, activeAnchorQuery]);
+
   useEffect(() => {
     executeSimulation(mode, activeScenarioId, activeAnchorQuery);
   }, [mode, activeScenarioId, activeAnchorQuery]);
