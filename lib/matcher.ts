@@ -22,17 +22,74 @@ export interface AgentConstraints {
   maxItems?: number;       // Maximum items to select (default 2)
 }
 
+
+export type CulturalConcept = 
+  | "proto-punk"
+  | "garage-rock"
+  | "glam-rock"
+  | "detroit-scene"
+  | "mid-century-modernism"
+  | "brutalism"
+  | "japanese-craft";
+
+export interface CulturalRelationship {
+  entityName: string;
+  concepts: CulturalConcept[];
+  provenance: string; // e.g. "Music Subculture Taxonomy"
+}
+
+/**
+ * Layer 2: Typed Cultural Relationship Registry
+ * Connects cultural entities to verified subcultural movements/concepts.
+ * Distinct from raw merchant product tags.
+ */
+export const CULTURAL_RELATIONSHIP_REGISTRY: Record<string, CulturalRelationship> = {
+  "mc5": {
+    entityName: "MC5",
+    concepts: ["proto-punk", "garage-rock", "detroit-scene"],
+    provenance: "Detroit 1968-1972 Counterculture Archive"
+  },
+  "the sonics": {
+    entityName: "The Sonics",
+    concepts: ["garage-rock", "proto-punk"],
+    provenance: "Pacific Northwest Garage Movement"
+  },
+  "iggy pop": {
+    entityName: "Iggy Pop",
+    concepts: ["proto-punk", "glam-rock", "detroit-scene"],
+    provenance: "CBGB & Detroit Proto-Punk Lineage"
+  },
+  "the stooges": {
+    entityName: "The Stooges",
+    concepts: ["proto-punk", "garage-rock", "detroit-scene"],
+    provenance: "Elektra Records Heritage Catalog"
+  },
+  "new york dolls": {
+    entityName: "New York Dolls",
+    concepts: ["proto-punk", "glam-rock"],
+    provenance: "Max's Kansas City Glam/Punk Scene"
+  },
+  "isamu noguchi": {
+    entityName: "Isamu Noguchi",
+    concepts: ["mid-century-modernism", "japanese-craft", "brutalism"],
+    provenance: "MoMA Modernist Architecture & Organic Sculpture Registry"
+  }
+};
+
 export interface CandidateEvaluationTrace {
   productId: string;
   title: string;
   price: number;
   category: string;
   status: "ACCEPTED" | "REJECTED";
+  matchingTier?: "Tier 1: Direct Entity Match" | "Tier 2: Cultural Concept Expansion" | "Tier 3: Metadata Alignment";
+  relationshipProvenance?: string;
   qlooEvidence?: {
     matchedEntityName?: string;
     matchedSubtype?: string;
     affinityScore?: number;
     genreOverlap?: string[];
+    connectingConcept?: string;
   };
   rejectionReason?: string;
 }
@@ -216,29 +273,61 @@ export function solveDynamicBundle(
   let currentSpend = 0;
 
   for (const candidate of pool) {
-    // 1. Evaluate Cultural Evidence from Qloo
+    // 1. Multi-Tier Cultural Evaluation (Direct Entity -> Cultural Relationship Registry -> Metadata)
     let bestMatchedEntity: QlooInsightItem | null = null;
-    let matchedKeywords: string[] = [];
+    let matchedTier: "Tier 1: Direct Entity Match" | "Tier 2: Cultural Concept Expansion" | "Tier 3: Metadata Alignment" | undefined;
+    let connectingConcept: string | undefined;
+    let relationshipProvenance: string | undefined;
 
     if (status === "LIVE_SUCCESS" && liveEntities.length > 0) {
-      // Find highest affinity entity matching candidate's cultural keywords
       for (const ent of liveEntities) {
-        const entNameLower = ent.name.toLowerCase();
-        const entGenres = (ent.genres || []).map(g => g.toLowerCase());
-        
-        const matches = candidate.qlooMatchKeywords.some(kw => {
-          const kwLower = kw.toLowerCase().trim();
-          const boundaryCheck = (target: string) => {
-            const tokens = target.split(/[^a-z0-9]+/);
-            return tokens.includes(kwLower) || target === kwLower;
-          };
-          return boundaryCheck(entNameLower) || entGenres.some(g => boundaryCheck(g));
+        const entNameLower = ent.name.toLowerCase().trim();
+        const entGenres = (ent.genres || []).map(g => g.toLowerCase().trim());
+        const candidateKeywords = candidate.qlooMatchKeywords.map(k => k.toLowerCase().trim());
+
+        // Tier 1: Direct Entity / Creator Match
+        const directMatch = candidateKeywords.some(kw => {
+          const tokens = entNameLower.split(/[^a-z0-9]+/);
+          return tokens.includes(kw) || entNameLower === kw;
         });
 
-        if (matches) {
+        if (directMatch) {
           if (!bestMatchedEntity || ent.affinity > bestMatchedEntity.affinity) {
             bestMatchedEntity = ent;
-            matchedKeywords.push(ent.name);
+            matchedTier = "Tier 1: Direct Entity Match";
+            connectingConcept = ent.name;
+            relationshipProvenance = "Direct artist/creator catalog match";
+          }
+          continue;
+        }
+
+        // Tier 2: Cultural Relationship Registry Expansion (Entity -> Concepts -> Catalog)
+        const registryEntry = CULTURAL_RELATIONSHIP_REGISTRY[entNameLower];
+        if (registryEntry) {
+          const matchingConcept = registryEntry.concepts.find(concept => 
+            candidateKeywords.some(kw => kw.includes(concept) || concept.includes(kw))
+          );
+          if (matchingConcept) {
+            if (!bestMatchedEntity || ent.affinity > bestMatchedEntity.affinity) {
+              bestMatchedEntity = ent;
+              matchedTier = "Tier 2: Cultural Concept Expansion";
+              connectingConcept = matchingConcept;
+              relationshipProvenance = `${registryEntry.provenance} (${registryEntry.entityName} → ${matchingConcept})`;
+            }
+            continue;
+          }
+        }
+
+        // Tier 3: Genre / Movement Token Alignment
+        const genreMatch = entGenres.find(g => 
+          candidateKeywords.some(kw => g.split(/[^a-z0-9]+/).includes(kw) || g === kw)
+        );
+        if (genreMatch) {
+          if (!bestMatchedEntity || ent.affinity > bestMatchedEntity.affinity) {
+            bestMatchedEntity = ent;
+            matchedTier = "Tier 3: Metadata Alignment";
+            connectingConcept = genreMatch;
+            relationshipProvenance = `Qloo Genre Classification (${genreMatch})`;
           }
         }
       }
@@ -250,7 +339,7 @@ export function solveDynamicBundle(
 
     if (bestMatchedEntity) {
       calculatedAffinity = bestMatchedEntity.affinity;
-      evidenceNote = `Live Qloo correlation: Matched related entity '${bestMatchedEntity.name}' (${bestMatchedEntity.subtype}) with affinity ${(calculatedAffinity * 100).toFixed(1)}%`;
+      evidenceNote = `Live Qloo correlation: [${matchedTier}] Matched '${bestMatchedEntity.name}' (${bestMatchedEntity.subtype}) via '${connectingConcept}' (Affinity: ${(calculatedAffinity * 100).toFixed(1)}%)`;
     } else if (candidate.candidateCategory === "care") {
       calculatedAffinity = 0.12; // Maintenance commodities have near-zero cultural affinity
       evidenceNote = "Maintenance utility commodity: No cultural entity or subculture affinity discovered in Qloo graph";
@@ -272,10 +361,13 @@ export function solveDynamicBundle(
         price: candidate.price,
         category: candidate.category,
         status: "REJECTED",
+        matchingTier: matchedTier,
+        relationshipProvenance,
         rejectionReason: `Cultural affinity ${(calculatedAffinity * 100).toFixed(1)}% is below threshold ${(minAffinity * 100).toFixed(0)}% (${evidenceNote})`,
         qlooEvidence: bestMatchedEntity ? {
           matchedEntityName: bestMatchedEntity.name,
-          affinityScore: calculatedAffinity
+          affinityScore: calculatedAffinity,
+          connectingConcept
         } : undefined
       });
       continue;
